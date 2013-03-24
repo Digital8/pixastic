@@ -7,9 +7,14 @@
 Pixastic.Actions.sepia = {
 
 	process : function(params) {
-		var mode = (parseInt(params.options.mode,10)||0);
-		if (mode < 0) mode = 0;
-		if (mode > 1) mode = 1;
+		//var mode = (parseInt(params.options.mode,10)||0);
+		var sepia = parseInt(params.options.sepia) / 100;
+		if (sepia < 0) sepia = 0;
+		if (sepia > 1) sepia = 1;
+		//need to linearise the intensity
+		sepia = Math.sqrt(sepia);
+		//if (mode < 0) mode = 0;
+		//if (mode > 1) mode = 1;
 
 		if (Pixastic.Client.hasCanvasImageData()) {
 			var data = Pixastic.prepareData(params);
@@ -24,22 +29,26 @@ Pixastic.Actions.sepia = {
 				do {
 					var offset = offsetY + (x-1)*4;
 
-					if (mode) {
+					/*if (mode) {
 						// a bit faster, but not as good
 						var d = data[offset] * 0.299 + data[offset+1] * 0.587 + data[offset+2] * 0.114;
 						var r = (d + 39);
 						var g = (d + 14);
 						var b = (d - 36);
-					} else {
+					} else {*/
 						// Microsoft
 						var or = data[offset];
 						var og = data[offset+1];
 						var ob = data[offset+2];
 	
-						var r = (or * 0.393 + og * 0.769 + ob * 0.189);
-						var g = (or * 0.349 + og * 0.686 + ob * 0.168);
-						var b = (or * 0.272 + og * 0.534 + ob * 0.131);
-					}
+						var sr = (or * 0.393 + og * 0.769 + ob * 0.189);
+						var sg = (or * 0.349 + og * 0.686 + ob * 0.168);
+						var sb = (or * 0.272 + og * 0.534 + ob * 0.131);
+						
+						var r = or * (1-sepia) + sr * sepia;
+						var g = og * (1-sepia) + sg * sepia;
+						var b = ob * (1-sepia) + sb * sepia;
+					//}
 
 					if (r < 0) r = 0; if (r > 255) r = 255;
 					if (g < 0) g = 0; if (g > 255) g = 255;
